@@ -1,0 +1,25 @@
+{
+        "name": "atk14/ajax-pager",
+        "type": "library",
+        "description": "",
+        "keywords": [],
+        "homepage": "https://github.com/atk14/AjaxPager",
+        "license": ["MIT"],
+        "authors": [
+                {
+                        "name": "ATK14 Development Team",
+                        "homepage": "https://github.com/orgs/atk14/people"
+                }
+        ],
+        "require": {
+                "php": ">=7.1"
+        },
+        "require-dev": {
+                "atk14/tester": "*",
+                "atk14/core": "*",
+                "atk14/dictionary": "*"
+        },
+        "autoload": {
+                "classmap": ["src/lib"]
+        }
+}
