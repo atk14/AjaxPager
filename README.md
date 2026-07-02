@@ -1,4 +1,4 @@
-AjaxPages
+AjaxPager
 =========
 
 [![Tests](https://github.com/atk14/AjaxPager/actions/workflows/tests.yml/badge.svg)](https://github.com/atk14/AjaxPager/actions/workflows/tests.yml)
