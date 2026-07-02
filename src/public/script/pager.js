@@ -8,66 +8,142 @@
 	var ATK14COMMON = window.ATK14COMMON;
 
 	ATK14COMMON.Pager = function( $element ) {
-		if ( $element.pagerInited ) { return; }
-		$element.pagerInited = this;
 		this.$pager = $( $element );
-		this.$list = this.$pager.find( ".js--pager-list" );
 		this.offsetName = "offset";
 		this.limitName = "count";
 		this.pagerName = "pager";
 
 		$.extend( this, this.$pager.data( "pager" ) );
-		this.updateCount();
+		this.reinit();
 
-		this.$buttons = {
-			first: this.$pager.find( ".js--first a" ),
-			previous: this.$pager.find( ".js--previous a" ),
-			next: this.$pager.find( ".js--next a" )
-		};
-		this.remains = this.$pager.find( ".js--remains" );
-
-		Object.keys( this.$buttons ).forEach( ( function( key ) {
-			var $button = this.$buttons[ key ];
-			$button.pager_role = key;
-			this.buttonize( $button, key );
-		} ).bind( this ) );
-
-		this.updateNextButton();
+		if ( this.$list.length === 0 ) {
+			console.warn( "AjaxPager:",
+					"List not found. Set class 'js--pager-list' to proper element"
+					);
+			return;
+		}
 
 		$( window ).on( "popstate",
-		    ( function( ) { this.doPaging( document.location.href ); } ).bind( this )
+				( function( ) { this.doPaging( window.document.location.href, undefined, { noScroll: true } ); } ).bind( this )
 		);
 
-		if ( this.form ) {
-			this.$form = $( "#" + this.form );
+	};
 
-			this.$form.find( "select" ).change( ( function() {
-				this.$form.submit();
+	ATK14COMMON.Pager.prototype.reinit = function( ) {
+			this.$list = this.$pager.find( ".js--pager-list" );
+			this.$buttons = {
+				first: this.$pager.find( ".js--first" ),
+				previous: this.$pager.find( ".js--previous" ),
+				next: this.$pager.find( ".js--next" )
+			};
+			this.remains = this.$pager.find( ".js--remains" );
+
+			Object.keys( this.$buttons ).forEach( ( function( key ) {
+				var $button = this.$buttons[ key ];
+				$button.pager_role = key;
+				this.buttonize( $button, key );
 			} ).bind( this ) );
 
-			this.$form.submit( ( function( e ) {
-					$.ajax( {
-						 type: "post",
-						 url: this.$form.attr( "action" ),
-						 data: this.$form.serialize(),
-						 dataType: "json",
-						 success: ( function( data ) {
-							 this.updatePager( data, { noScroll: true } ) ;
+			this.updateCount();
+			this.updateNextButton();
+
+			if ( this.form ) {
+				this.$form = $( "#" + this.form );
+				// console.log( "this.form: " + this.form ); // e.g. "form_categories_card_list_paging"
+
+				if ( this.$form.length === 1 && !this.$form[ 0 ].pagerInited ) {
+
+					$( "#paging_form" ).on( "click", function( e ) {
+						e.preventDefault();
+						if ( e.target.tagName.toUpperCase() === "A" ) {
+							var $a = $( e.target );
+							var $form = $( "#paging_form" ).find( "form" ); 
+							$a.parent().siblings().removeClass( "active" );
+							$a.parent().addClass( "active" );
+							if( $form.data( "remote" ) ) {
+								// $form is an ATK14 remote form
+								var $filter_form = $( "#filter_form" );
+								$form.attr( "action", $a.attr( "href" ) );
+								$filter_form.attr( "action", $a.data( "filter_href" ));
+								$filter_form[ 0 ].filtering++;
+								console.log( $form.attr( "action" ) );
+								$form.submit();
+							} else {
+								// $form is not an ATK14 remote form
+								window.location.href = $a.attr( "href" ) + "#pager";
+							}
+						}
+						return false;
+					} );
+
+					/*
+					$form.find( "a" ).click( function() {
+						var $a = $( this );
+						var $filter_form = $( "#filter_form" );
+						$a.parent().siblings().removeClass( "active" );
+						$a.parent().addClass( "active" );
+						$form.attr( "action", $a.attr( "href" ));
+						$filter_form.attr( "action", $a.attr( "href" ));
+						$filter_form[ 0 ].filtering++;
+						$form.submit();
+
+						return false;
+					} );
+					*/
+
+					/*
+					this.$form.find( "select,input[type=radio]" ).change( ( function() {
+						this.$form.submit();
+					} ).bind( this ) );
+					*/
+
+					/*
+					this.$form.submit( ( function( e ) {
+						var replaceParams = this.$form.serialize();
+						var replaceUrl;
+						replaceUrl = this.$form.attr( "action" );
+						if ( replaceParams !== "order=default" ) {
+							replaceUrl += replaceUrl.indexOf( "?" ) === -1 ? "?" : "&";
+							replaceUrl += replaceParams;
+						}
+						this.url = replaceUrl;
+						$.ajax( {
+							type: "post",
+							url: this.$form.attr( "action" ),
+							data: this.$form.serialize(),
+							dataType: "json",
+							success: ( function( data ) {
+								this.updatePager( data, { noScroll: true } ) ;
+								window.document.activeElement.blur();
+								window.history.replaceState(
+									{}, "",
+									replaceUrl
+								);
 							} ).bind( this )
-					 } );
-				e.preventDefault();
-				return false;
+						} );
+						e.preventDefault();
+						return false;
+					}
+					).bind( this ) );
+					*/
+
+					this.$form[ 0 ].pagerInited = true;
 				}
-				).bind( this ) );
-		}
+			}
 	};
 
 	ATK14COMMON.Pager.init = function() {
-		$( ".ajax_pager" ).each( function( k, $e ) { new ATK14COMMON.Pager( $e ); } );
+		$( ".ajax_pager" ).each( function( k, $e ) {
+			if ( $e.ajaxPager ) {
+				$e.ajaxPager.reinit();
+			} else {
+				$e.ajaxPager = new ATK14COMMON.Pager( $e );
+			}
+		} );
 	};
 
 	ATK14COMMON.Pager.prototype.updateCount = function() {
-			this.count = this.$list.find( ".js--pager-item" ).length;
+		this.count = parseInt( this.$pager.data( "count" ) );
 	};
 
 	ATK14COMMON.Pager.prototype.getText = function( text ) {
@@ -91,7 +167,7 @@
 		var gname;
 		for ( i = add.length ; i > 0 ; i-- ) {
 			gname = add.join( "/" );
-			if ( this.texts[ gname ] ) {
+			if ( this.texts[ gname ] !== undefined ) {
 				gname = this.texts[ gname ];
 				for ( var j = 0; j < replace.length ; j++ ) {
 					gname = gname.replace( replace[ j ].search, replace[ j ].replace );
@@ -153,13 +229,19 @@
 			remain = undefined;
 		} else if ( this.count + this.pageSize > this.sectionSize ) {
 			text = "next_page";
-			url = this.addToUrl( this.url, { offset: this.offset + this.count,
-			                                 limit: this.newPageSize() } );
+			url = this.addToUrl( this.url, {
+				offset: this.offset + this.count,
+				limit: this.newPageSize()
+			} );
 			remain = undefined;
+			this.$buttons.next.addClass("next-page").removeClass("next-items");
 		} else {
 			text = "next";
-			url = this.addToUrl( this.url, { offset: this.offset + this.count } );
+			url = this.addToUrl( this.url, {
+				offset: this.offset + this.count
+			} );
 			remain = Math.min( remain, this.pageSize );
+			this.$buttons.next.addClass("next-items").removeClass("next-page");
 		}
 		this.updateButton( this.$buttons.next, url, text, remain );
 	};
@@ -173,11 +255,37 @@
 		if ( data.pageSize ) {
 			this.pageSize = data.pageSize;
 		}
+
+		var $items = $( data.items );
+		var $masonry = this.$list.closest( ".masonry" );
+		var origOffset = $( window ).scrollTop();
+		var $body = $( "body" );
+		var origOverflowAnchor = $body.css( "overflow-anchor" );
+
+		if ( data.paginator ) {
+			$( "#js--ajax_pager__paginator" ).replaceWith( data.paginator );
+		}
+
+		$body.css( "overflow-anchor", "none" );
+
 		if ( data.offset !== this.offset + this.count ||
 			   data.count + this.count > this.sectionSize ||
 				 data.forceReplace
 			 ) {
-			this.$list.html( data.items );
+
+			// Replacing content either of a masonry or a classic list
+			if ( this.$list.hasClass( "masonry__items" ) ) {
+				$masonry.find( ".masonry__item" ).addClass( "d-none" );
+				$masonry.colcade(
+					"prepend",
+					$items.filter( ".masonry__item" )
+				);
+				$masonry.find( ".masonry__item.d-none" ).remove();
+				$masonry.find( "input[type='number']" ).stepper();
+			} else {
+				this.$list.html( $items );
+			}
+
 			this.offset = data.offset;
 			this.count = data.count;
 
@@ -188,12 +296,31 @@
 				);
 			}
 			if ( !options.noScroll ) {
-				var $el = this.$pager.find( "a[name=" + this.pagerName + "_top_href]" );
+				var $el = this.$pager.find( "a[id=anchor--" + this.pagerName + "-top]" );
 				$( "html,body" ).animate( { scrollTop: $el.offset().top }, "slow" );
 			}
 		} else {
-			this.$list.append( data.items );
+
+			// Appending new items either to a masonry or to a classic list
+			if ( this.$list.hasClass( "masonry__items" ) ) {
+				$masonry.find( ".masonry__item" ).addClass( "custom-marker" );
+				this.$list.closest( ".masonry" ).colcade(
+					"append",
+					$items.filter( ".masonry__item" )
+				);
+				$masonry.find( ".masonry__item:not(.custom-marker) input[type='number']" ).stepper();
+				$masonry.find( ".masonry__item" ).removeClass( "custom-marker" );
+			} else {
+				$items.hide().appendTo( this.$list ).fadeIn( "slow" );
+			}
+
 			this.count += data.count;
+
+			// This is a fallback when setting the overflow-anchor doesn't help.
+			// There is a small delay to make sure that the Colcade finished its job.
+			setTimeout( function() {
+				$( "html,body" ).scrollTop( origOffset );
+			}, 10 ); // very soon
 
 			if ( options.addToHistory ) {
 				window.history.replaceState(
@@ -203,39 +330,52 @@
 			}
 		}
 
-		this.updateButton( this.$buttons.first, this.offset ? this.url : null );
+		this.updateButton( this.$buttons.first, this.offset > this.sectionSize ?
+			this.addToUrl(this.url, { limit: this.sectionSize } ) :
+			null
+		);
 		var pSize = this.newPageSize();
-		this.updateButton( this.$buttons.previous, this.offset > this.sectionSize ?
+		this.updateButton( this.$buttons.previous, this.offset ?
 				this.addToUrl( this.url, { offset: this.offset - pSize, limit: pSize } ) : "" );
 		this.updateNextButton();
 		this.updateRemains();
+
+		$body.css( "overflow-anchor", origOverflowAnchor );
+
+		/**
+		 * Pustime si callback, pokud jsme si ho s daty poslali
+		 */
+		if ( data.callback !== undefined ) {
+			var cb = new Function( "return " + data.callback );
+			( cb() )();
+		}
 	};
 
 	ATK14COMMON.Pager.prototype.updateRemains = function() {
 		var remain = this.total - this.offset - this.count;
 		var text;
-
-		if ( remain ) {
-			text = this.getText( "remain", remain, this.total );
-		}
+		text = this.getText( "remain", remain, this.total );
 		this.remains.html( text );
 	};
 
 	ATK14COMMON.Pager.prototype.click = function( button ) {
-		  var href = button.attr( "href" );
-			if ( !href ) {
-				return false; }
-			button.restoreText = button.html();
-			button.html( this.getText( "loading" ) );
-			this.doPaging( href, button );
-			return false;
+		var href = button.attr( "href" );
+		if ( !href ) {
+			return false; }
+		button.restoreText = button.html();
+
+		//X button.html( this.getText( "loading" ) );
+		this.doPaging( href, button );
+		return false;
 	};
 
-	ATK14COMMON.Pager.prototype.doPaging = function( href, button ) {
+	ATK14COMMON.Pager.prototype.doPaging = function( href, button, updatePagerOptions ) {
+			updatePagerOptions = updatePagerOptions || {};
+			updatePagerOptions.addToHistory = button;
 			$.ajax( {
 				url:     this.addToUrl( href, { "pager": 1 } ),
 				success: ( function( data ) {
-							this.updatePager( data, { addToHistory: button } );
+							this.updatePager( data, updatePagerOptions );
 							} ).bind( this ),
 				complete: function( ) {
 					if ( button && button.restoreText ) {

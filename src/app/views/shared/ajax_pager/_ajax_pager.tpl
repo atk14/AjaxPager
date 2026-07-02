@@ -1,15 +1,31 @@
-{if !$pager}
-{assign var=pager value=$finder->getPager()}
-{/if}
+{*
+ *
+ *	{render partial="shared/ajax_pager/ajax_pager" list_class="card-deck card-deck--sized-2 card-deck--dark product-list"}
+ *}
+
+{if !$pager}{assign var=pager value=$finder->getPager()}{/if}
+{if !$list_class}{assign list_class "card-deck card-deck--sized-4 product-list"}{/if}
+
+{assign var=items value=$finder->getRecords()}
+{assign var=item_name value="`$pager->getItemVariable()`"} {* e.g. "item" *}
 
 {if !$pager->isXhr()}
-<div class='ajax_pager' data-pager='{$pager->jsData()}' id='{$pager->getName()}'>
+<div class="ajax_pager" data-count={count($finder->getRecords())} data-pager="{$pager->jsData()}" id="{$pager->getName()}">
 {/if}
-	<a name="{$pager->getName()}_top_href">
-	<ul class="list list--base-5 list--products js--pager-list">
+	<a id="anchor--{$pager->getName()}-top" class="sr-only">&nbsp;</a>
+	<div class="js--empty-list">
+		{if $finder->isEmpty()}
+			{render partial=$finder->getPager()->getEmptyTemplate()} {* e.g. "shared/ajax_pager/empty_list"*}
+		{/if}
+	</div>
+	<div class="{$list_class} js--pager-list js--nonempty-list">
 		{render partial="shared/ajax_pager/ajax_pager_list"}
-	</ul>
+	</div>
+	<div class="pagination-container">
+		<div class="pager-buttons js--pager-buttons">
+			{render partial="shared/ajax_pager/ajax_pager_buttons"}
+		</div>
+	</div>
 {if !$pager->isXhr()}
-	{render partial="shared/ajax_pager/ajax_pager_buttons"}
-	</ul>
+</div>
 {/if}

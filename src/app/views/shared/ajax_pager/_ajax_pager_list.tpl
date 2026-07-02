@@ -1,6 +1,6 @@
 {foreach from=$finder item=item}
-	{assign var="`$pager->getItemVariable()`" value=$item}
-	<li class="list__item">
-		{render partial=$pager->getItemTemplate()}
-	</li>
+	{if !$skip_first_three_items || $item@iteration>3}
+	{assign var="`$pager->getItemVariable()`" value=$item} {* e.g. "item" *}
+	{render partial=$pager->getItemTemplate()} {* e.g. "shared/card_item" *}
+	{/if}
 {/foreach}
