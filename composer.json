@@ -16,8 +16,12 @@
         },
         "require-dev": {
                 "atk14/tester": "*",
-                "atk14/core": "*",
-                "atk14/dictionary": "*"
+                "atk14/core": "dev-master",
+                "atk14/dictionary": "*",
+                "atk14/http": "*",
+                "atk14/dictionary": "*",
+                "atk14/forms": "*",
+                "atk14/stop-watch": "*"
         },
         "autoload": {
                 "classmap": ["src/lib"]

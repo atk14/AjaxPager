@@ -617,6 +617,12 @@ class AjaxPager {
 		return $out;
 	}
 
+	function getActiveSorting(){
+		foreach($this->getSortingPossibilities() as $p){
+			if($p->isActive()){ return $p; }
+		}
+	}
+
 	function getPageSizePossibilities(){
 		$page_sizes = $this->options["page_size_possibilities"]; // [30,60,90]
 		$page_size_name = $this->options["page_size_name"]; // "page_size"
@@ -640,6 +646,12 @@ class AjaxPager {
 			]);
 		}
 		return $out;
+	}
+
+	function getActivePageSize(){
+		foreach($this->getPageSizePossibilities() as $p){
+			if($p->isActive()){ return $p; }
+		}
 	}
 
 	function _createForm($sorting){

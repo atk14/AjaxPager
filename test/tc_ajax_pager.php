@@ -77,4 +77,55 @@ class TcAjaxPager extends TcBase {
 		$this->assertEquals(30,$ap->options["page_size"]);
 		$this->assertEquals([30],$ap->options["page_size_possibilities"]);
 	}
+
+	function test(){
+		$controller = new Atk14Controller();
+		$controller->params = new Dictionary();
+		$controller->request = $GLOBALS["HTTP_REQUEST"];
+
+		$sorting = new Atk14Sorting();
+		$sorting->add("default", "created_at DESC, id DESC",[
+			"title" => "Recommended",
+		]);
+		$sorting->add("price", "price DESC, id DESC",[
+			"title" => "Price",
+		]);
+		$ap = new AjaxPager($controller,[
+			"sorting" => $sorting,
+			"page_size_possibilities" => [24,48,72],
+		]);
+
+		// --
+
+		$sorting_possibilities = $ap->getSortingPossibilities();
+
+		$this->assertEquals(2,sizeof($sorting_possibilities));
+
+		$this->assertEquals("Recommended",$sorting_possibilities[0]->getTitle());
+		$this->assertEquals(true,$sorting_possibilities[0]->isActive());
+
+		$this->assertEquals("Price",$sorting_possibilities[1]->getTitle());
+		$this->assertEquals(false,$sorting_possibilities[1]->isActive());
+
+		$active_sorting = $ap->getActiveSorting();
+		$this->assertEquals("Recommended",$active_sorting->getTitle());
+
+		// --
+
+		$page_size_possibilities = $ap->getPageSizePossibilities();
+
+		$this->assertEquals(3,sizeof($page_size_possibilities));
+
+		$this->assertEquals("24",$page_size_possibilities[0]->getTitle());
+		$this->assertEquals(true,$page_size_possibilities[0]->isActive());
+
+		$this->assertEquals("48",$page_size_possibilities[1]->getTitle());
+		$this->assertEquals(false,$page_size_possibilities[1]->isActive());
+
+		$this->assertEquals("72",$page_size_possibilities[2]->getTitle());
+		$this->assertEquals(false,$page_size_possibilities[2]->isActive());
+
+		$active_page_size = $ap->getActivePageSize();
+		$this->assertEquals("24",$active_page_size->getTitle());
+	}
 }
