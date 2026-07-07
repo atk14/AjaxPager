@@ -59,8 +59,11 @@
 				if ( this.$form.length === 1 && !this.$form[ 0 ].pagerInited ) {
 
 					$( "#paging_form" ).on( "click", function( e ) {
-						e.preventDefault();
-						if ( e.target.tagName.toUpperCase() === "A" ) {
+						if (
+							e.target.tagName.toUpperCase() === "A" &&
+							!$( e.target ).closest( "a" ).hasClass( "dropdown-toggle" )
+						) {
+							e.preventDefault();
 							var $a = $( e.target );
 							var $form = $( "#paging_form" ).find( "form" );
 							$a.parent().siblings().removeClass( "active" );
@@ -77,8 +80,8 @@
 								// $form is not an ATK14 remote form
 								window.location.href = $a.attr( "href" ) + "#pager";
 							}
+							return false;
 						}
-						return false;
 					} );
 
 					/*
