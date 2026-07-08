@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to AjaxPager will be documented in this file.
 
+## [0.2.4] - 2026-07-08
+
+* a40e576 - Add pager loading state via onLoadStart/onLoadFinish methods
+
 ## [0.2.3] - 2026-07-07
 
 * 2ab07ef - pager.js fixed
