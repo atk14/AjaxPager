@@ -12,6 +12,7 @@
 		this.offsetName = "offset";
 		this.limitName = "count";
 		this.pagerName = "pager";
+		this.$pagerButtons = this.$pager.find( ".pager-buttons" );
 
 		$.extend( this, this.$pager.data( "pager" ) );
 		this.reinit();
@@ -380,6 +381,7 @@
 	};
 
 	ATK14COMMON.Pager.prototype.doPaging = function( href, button, updatePagerOptions ) {
+			this.onLoadStart( button );
 			updatePagerOptions = updatePagerOptions || {};
 			updatePagerOptions.addToHistory = !!button;
 			$.ajax( {
@@ -388,13 +390,23 @@
 							this.updatePager( data, updatePagerOptions );
 							} ).bind( this ),
 				complete: function( ) {
+					this.onLoadFinish( button );
 					if ( button && button.restoreText ) {
 						button.html( button.restoreText );
 						button.restoreText = undefined;
 					}
-				},
+				}.bind( this ),
 				dataType: "json"
 			} );
+	};
+
+	ATK14COMMON.Pager.prototype.onLoadStart = function( button ) {
+		this.$pagerButtons.attr( "data-status", "loading" );
+		button.addClass( "js--clicked" );
+	};
+	ATK14COMMON.Pager.prototype.onLoadFinish = function( button ) {
+		this.$pagerButtons.attr( "data-status", "idle" );
+		button.removeClass( "js--clicked" );
 	};
 
 	$( function() {
