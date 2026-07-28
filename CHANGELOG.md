@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to AjaxPager will be documented in this file.
 
+## [0.2.5] - 2026-07-28
+
+* ec47d54 - Template fixed (20 minutes ago) <Jaromir Tomek>
+* 723368e - Debug code removed
+* 209a4d8 - Make XHR response template configurable via xhr_template option
+
 ## [0.2.4] - 2026-07-08
 
 * a40e576 - Add pager loading state via onLoadStart/onLoadFinish methods
