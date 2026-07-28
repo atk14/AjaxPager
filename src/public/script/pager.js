@@ -75,7 +75,6 @@
 								$form.attr( "action", $a.attr( "href" ) );
 								$filterForm.attr( "action", $a.data( "filter_href" ) );
 								$filterForm[ 0 ].filtering++;
-								console.log( $form.attr( "action" ) );
 								$form.submit();
 							} else {
 								// $form is not an ATK14 remote form
