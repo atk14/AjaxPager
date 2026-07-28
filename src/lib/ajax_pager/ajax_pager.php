@@ -68,6 +68,7 @@ class AjaxPager {
 			"order_name" => 'order',     //order param name
 			"paging_per" => "section",    //next/previous page lead to whole section, not page
 			"empty_template" => "shared/ajax_pager/empty_list",
+			"xhr_template" => "shared/ajax_pager/_ajax_pager_xhr",
 			"sorting" => null,
 			'order_label' => _("Seřadit dle")
 		];
@@ -329,6 +330,10 @@ class AjaxPager {
 		return $this->options['empty_template'];
 	}
 
+	function getXhrTemplate(){
+		return $this->options['xhr_template'];
+	}
+
 	function setItemTemplate($template) {
 		return $this->options['item_template'] = $template;
 	}
@@ -392,7 +397,7 @@ class AjaxPager {
 			$this->setTotal($finder->getRecordsCount());
 			if(!$this->isXhr()) return false;
 			$this->controller->render_layout = false;
-			$this->controller->template_name = 'shared/ajax_pager/_ajax_pager_xhr';
+			$this->controller->template_name = $this->getXhrTemplate();
 			$this->controller->tpl_data['finder'] = $finder;
 			$this->controller->tpl_data['pager'] = $this;
 			return true;
